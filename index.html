@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Unitmax portfolio focused on game projects with expandable sections."
+    />
+    <title>Unitmax | Portfolio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800&family=Rajdhani:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+    <script src="./script.js" defer></script>
+  </head>
+  <body>
+    <div class="scene-glow" aria-hidden="true"></div>
+    <div class="scene-grid" aria-hidden="true"></div>
+    <main class="portfolio-shell">
+      <header class="hero">
+        <p class="hero-label">Personal Portfolio</p>
+        <h1 class="hero-logo">
+          <span class="hero-logo--cyan">UNIT</span><span class="hero-logo--pink">MAX</span>
+        </h1>
+        <p class="hero-subtitle">
+          Game-focused developer portfolio with room to grow into projects, writing, and contact info.
+        </p>
+      </header>
+
+      <nav class="section-nav" aria-label="Portfolio sections">
+        <button class="nav-tab" type="button" data-section="projects">Projects</button>
+        <button class="nav-tab" type="button" data-section="about">About</button>
+        <button class="nav-tab is-active" type="button" data-section="games">Games</button>
+        <button class="nav-tab" type="button" data-section="contact">Contact</button>
+      </nav>
+
+      <section class="section-panel" id="projects" aria-labelledby="projects-heading" hidden>
+        <h2 id="projects-heading">Projects</h2>
+        <p class="section-copy">
+          Reserved for non-game work. Add product builds, tools, and collaborations here as your portfolio expands.
+        </p>
+      </section>
+
+      <section class="section-panel" id="about" aria-labelledby="about-heading" hidden>
+        <h2 id="about-heading">About</h2>
+        <p class="section-copy">
+          I build high-energy game experiences and interactive web projects. This layout is modular so each section can
+          scale without redesigning the site.
+        </p>
+      </section>
+
+      <section class="section-panel is-open" id="games" aria-labelledby="games-heading">
+        <div class="section-headline">
+          <h2 id="games-heading">Games (Active)</h2>
+          <p class="section-copy">
+            The cards below are rendered from a JavaScript data list for easy future expansion.
+          </p>
+        </div>
+        <div id="games-grid" class="games-grid"></div>
+      </section>
+
+      <section class="section-panel" id="contact" aria-labelledby="contact-heading" hidden>
+        <h2 id="contact-heading">Contact</h2>
+        <p class="section-copy">
+          Add your links here: GitHub, Itch, LinkedIn, Discord, email, and downloadable resume.
+        </p>
+      </section>
+    </main>
+  </body>
+</html>
