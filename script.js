@@ -2,7 +2,7 @@ const games = [
   {
     title: "Pure Pour",
     genre: "Interactive Puzzle",
-    url: "#",
+    url: "./games/pure-pour/",
     artHue: 196,
   },
   {
