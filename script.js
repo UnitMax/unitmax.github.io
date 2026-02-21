@@ -1,7 +1,7 @@
 const games = [
   {
-    title: "Cyber Quest",
-    genre: "Action Platformer",
+    title: "Pure Pour",
+    genre: "Interactive Puzzle",
     url: "#",
     artHue: 196,
   },
