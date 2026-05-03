@@ -178,6 +178,10 @@ body {
   animation: reveal 260ms ease;
 }
 
+.portfolio-shell > section[hidden] {
+  display: none;
+}
+
 .section-panel h2 {
   margin: 0;
   text-transform: uppercase;
