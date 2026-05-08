@@ -5,73 +5,227 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="Unitmax portfolio focused on games, projects, and experiments with expandable sections."
+      content="Unitmax — portfolio of games, tools, and experiments."
     />
-    <title>Unitmax | Portfolio</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800&family=Rajdhani:wght@400;600;700&display=swap"
-      rel="stylesheet"
-    />
+    <title>Unitmax — Portfolio</title>
+    <link rel="stylesheet" href="./fonts/fonts.css" />
     <link rel="stylesheet" href="./styles.css" />
     <script src="./script.js" defer></script>
   </head>
-  <body>
-    <div class="scene-glow" aria-hidden="true"></div>
-    <div class="scene-grid" aria-hidden="true"></div>
-    <main class="portfolio-shell">
-      <header class="hero">
-        <p class="hero-label">Personal Portfolio</p>
-        <h1 class="hero-logo">
-          <span class="hero-logo--cyan">UNIT</span><span class="hero-logo--pink">MAX</span>
-        </h1>
-        <p class="hero-subtitle">
-          I am Unitmax.
-        </p>
-      </header>
+  <body id="top">
+    <div class="bg-grid" aria-hidden="true"></div>
+    <div class="bg-glow" aria-hidden="true"></div>
+    <div class="bg-scan" aria-hidden="true"></div>
+    <div class="bg-noise" aria-hidden="true"></div>
 
-      <nav class="section-nav" aria-label="Portfolio sections">
-        <button class="nav-tab" type="button" data-section="about">About</button>
-        <button class="nav-tab is-active" type="button" data-section="games-projects">Games & Projects</button>
-        <button class="nav-tab" type="button" data-section="contact">Contact</button>
+    <header class="topbar">
+      <a class="brand" href="#top" aria-label="Unitmax — home">
+        <span class="brand-mark" aria-hidden="true">
+          <span class="brand-mark-pulse"></span>
+        </span>
+        <span class="brand-text">unitmax<span class="brand-text-mark">/</span></span>
+      </a>
+
+      <nav class="topnav" aria-label="Primary">
+        <span class="topnav-bracket" aria-hidden="true">[</span>
+        <a href="#about" class="topnav-link" data-target="about">
+          <span class="topnav-num">01</span><span class="topnav-text">about</span>
+        </a>
+        <span class="topnav-sep" aria-hidden="true">·</span>
+        <a href="#work" class="topnav-link" data-target="work">
+          <span class="topnav-num">02</span><span class="topnav-text">work</span>
+        </a>
+        <span class="topnav-sep" aria-hidden="true">·</span>
+        <a href="#contact" class="topnav-link" data-target="contact">
+          <span class="topnav-num">03</span><span class="topnav-text">contact</span>
+        </a>
+        <span class="topnav-bracket" aria-hidden="true">]</span>
       </nav>
 
-      <section class="section-panel" id="about" aria-labelledby="about-heading" hidden>
-        <h2 id="about-heading">About</h2>
-        <p class="section-copy">
-          I build software among other things.
-        </p>
-      </section>
+      <div class="status" aria-label="Status: available">
+        <span class="status-dot" aria-hidden="true"></span>
+        <span class="status-text">Available</span>
+      </div>
+    </header>
 
-      <section class="section-stack is-open" id="games-projects" aria-label="Games and projects">
-        <div class="section-panel showcase-card">
-          <div class="section-headline">
-            <h2 id="games-heading">Games</h2>
-            <p class="section-copy">
-              Play some fun games here.
-            </p>
+    <main class="shell">
+      <section class="hero">
+        <div class="hero-inner">
+          <p class="eyebrow stagger" style="--i:0">
+            <span class="eyebrow-rule" aria-hidden="true"></span>
+            <span class="eyebrow-text">Personal Portfolio</span>
+            <span class="eyebrow-tag">— v2.1</span>
+          </p>
+
+          <h1 class="hero-title">
+            <span class="hero-line hero-line--soft stagger" style="--i:1">I am</span>
+            <span class="hero-line stagger" style="--i:2">
+              <em class="hero-name">Unitmax</em><span class="hero-cursor" aria-hidden="true"></span><span class="hero-period" aria-hidden="true">.</span>
+            </span>
+          </h1>
+
+          <p class="hero-sub stagger" style="--i:3">
+            I build software <em>—&nbsp;among other things.</em>
+          </p>
+
+          <ul class="hero-meta stagger" style="--i:4" aria-label="Meta">
+            <li><span class="hero-meta-key">focus</span> games · tools · experiments</li>
+            <li class="dot" aria-hidden="true"></li>
+            <li><span class="hero-meta-key">year</span> 2026</li>
+            <li class="dot" aria-hidden="true"></li>
+            <li><span class="hero-meta-key">stack</span> tbd</li>
+          </ul>
+
+          <div class="hero-actions stagger" style="--i:5">
+            <a class="btn btn-primary" href="#work">
+              <span>View work</span>
+              <span class="btn-arrow" aria-hidden="true">→</span>
+            </a>
+            <a class="btn btn-ghost" href="#contact">
+              <span>Get in touch</span>
+            </a>
           </div>
-          <div id="games-grid" class="games-grid"></div>
         </div>
 
-        <div class="section-panel showcase-card">
-          <div class="section-headline">
-            <h2 id="projects-heading">Projects</h2>
-            <p class="section-copy">
-              Small tools, extensions, and quality-of-life builds.
-            </p>
+        <div class="hero-deco" aria-hidden="true">
+          <span class="hud-label hud-label--tl">[ scan_active ]</span>
+          <span class="hud-label hud-label--tr">lat 48.55°</span>
+          <span class="hud-label hud-label--bl">long 11.26°</span>
+          <span class="hud-label hud-label--br">portfolio.scan()</span>
+
+          <div class="dial">
+            <svg class="dial-bezel" viewBox="-100 -100 200 200" aria-hidden="true"></svg>
+            <span class="dial-cardinal dial-cardinal--n">N</span>
+            <span class="dial-cardinal dial-cardinal--e">E</span>
+            <span class="dial-cardinal dial-cardinal--s">S</span>
+            <span class="dial-cardinal dial-cardinal--w">W</span>
+
+            <div class="dial-ring dial-ring--1"></div>
+            <div class="dial-ring dial-ring--2"></div>
+            <div class="dial-ring dial-ring--3"></div>
+
+            <div class="dial-crosshair"></div>
+            <div class="dial-sweep"></div>
+            <div class="dial-sweep-trail"></div>
+
+            <span class="dial-blip" style="--x:32%;--y:30%;--d:0.4s"></span>
+            <span class="dial-blip" style="--x:69%;--y:38%;--d:1.1s"></span>
+            <span class="dial-blip" style="--x:55%;--y:72%;--d:2.0s"></span>
+            <span class="dial-blip dial-blip--lg" style="--x:42%;--y:60%;--d:2.8s"></span>
+
+            <div class="dial-core">
+              <span class="dial-core-glyph">u</span>
+              <span class="dial-core-mono">unitmax · scan</span>
+            </div>
           </div>
-          <div id="projects-grid" class="games-grid"></div>
         </div>
       </section>
 
-      <section class="section-panel" id="contact" aria-labelledby="contact-heading" hidden>
-        <h2 id="contact-heading">Contact</h2>
-        <p class="section-copy">
-          Add links here: GitHub, Itch, LinkedIn, Discord, email, and downloadable resume.
-        </p>
+      <section class="section" id="about" aria-labelledby="about-heading">
+        <header class="section-head">
+          <span class="section-num">01 —</span>
+          <h2 id="about-heading" class="section-title">About</h2>
+        </header>
+        <div class="about-grid">
+          <div class="about-main">
+            <p class="about-lede">
+              I build software <em>among other things</em>.
+            </p>
+            <p class="about-body">
+              I build, ship, and occasionally break things (not at my day job though) — mostly software. The hand-craft-every-line era of coding is winding down, and the new loop — <em>think, describe, generate, iterate, ship</em> — is here to stay (notice the em dashes?).
+            </p>
+            <p class="about-body">
+              A decade of classical engineering still lives in my hands, but most of my keyboard time these days goes into pairing with AI. Fewer characters typed, more decisions made, faster things out in the world. Suits me.
+            </p>
+            <ul class="about-tags" aria-label="How I work">
+              <li>AI-first</li>
+              <li>Build &amp; ship</li>
+              <li>Prototypes</li>
+              <li>Tooling</li>
+              <li>Product</li>
+              <li>Side quests</li>
+              <li>Games</li>
+            </ul>
+          </div>
+          <aside class="about-aside" aria-label="Quick facts">
+            <p class="aside-label">// quick facts</p>
+            <dl class="meta-list">
+              <div class="meta-row"><dt>Location</dt><dd>Germany</dd></div>
+              <div class="meta-row"><dt>Currently</dt><dd>Software Engineer · Product Owner</dd></div>
+              <div class="meta-row"><dt>Stack</dt><dd>C++ · Java · TypeScript · Python · PyTorch · Angular · Unity</dd></div>
+              <div class="meta-row"><dt>Pair</dt><dd>Claude Code · Codex</dd></div>
+            </dl>
+          </aside>
+        </div>
       </section>
+
+      <section class="section" id="work" aria-labelledby="work-heading">
+        <header class="section-head">
+          <span class="section-num">02 —</span>
+          <h2 id="work-heading" class="section-title">Work</h2>
+        </header>
+
+        <div class="subsection">
+          <div class="subsection-head">
+            <div>
+              <h3 class="subsection-title">Games</h3>
+              <p class="subsection-sub">Play some fun games here.</p>
+            </div>
+            <span class="subsection-count" data-count-for="games-grid">—</span>
+          </div>
+          <div id="games-grid" class="card-grid"></div>
+        </div>
+
+        <div class="subsection">
+          <div class="subsection-head">
+            <div>
+              <h3 class="subsection-title">Projects</h3>
+              <p class="subsection-sub">
+                Small tools, extensions, and quality-of-life builds.
+              </p>
+            </div>
+            <span class="subsection-count" data-count-for="projects-grid">—</span>
+          </div>
+          <div id="projects-grid" class="card-grid"></div>
+        </div>
+      </section>
+
+      <section class="section" id="contact" aria-labelledby="contact-heading">
+        <header class="section-head">
+          <span class="section-num">03 —</span>
+          <h2 id="contact-heading" class="section-title">Contact</h2>
+        </header>
+        <p class="lede">
+          Want to collaborate, talk shop, or just say hi? GitHub is the fastest signal for now — I'll wire up more channels here over time.
+        </p>
+        <ul class="contact-list">
+          <li class="contact-row">
+            <span class="contact-row-num">01</span>
+            <span class="contact-row-label">GitHub</span>
+            <span class="contact-row-rule" aria-hidden="true"></span>
+            <a class="contact-row-link" href="https://github.com/UnitMax" target="_blank" rel="noopener" aria-label="GitHub">
+              <span class="contact-row-handle">@UnitMax</span>
+              <span class="contact-row-arrow" aria-hidden="true">↗</span>
+            </a>
+          </li>
+          <li class="contact-row">
+            <span class="contact-row-num">02</span>
+            <span class="contact-row-label">Resume</span>
+            <span class="contact-row-rule" aria-hidden="true"></span>
+            <a class="contact-row-link" href="#" aria-label="Resume">
+              <span class="contact-row-handle">resume.pdf</span>
+              <span class="contact-row-arrow" aria-hidden="true">↓</span>
+            </a>
+          </li>
+        </ul>
+      </section>
+
+      <footer class="footer">
+        <div class="footer-row">
+          <span class="footer-mark">© 2026 — Unitmax</span>
+          <span class="footer-tag">Built from scratch · /portfolio.v2</span>
+        </div>
+      </footer>
     </main>
   </body>
 </html>
