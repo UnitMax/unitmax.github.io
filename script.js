@@ -34,6 +34,14 @@ const projects = [
     url: "https://github.com/UnitMax/LostButtonFoundry",
     artHue: 126,
   },
+  {
+    title: "SnipCaddy",
+    genre: "Windows Screenshot Utility",
+    description:
+      "A tray-first, fully private C# / WPF screenshot caddy for fast region captures, clipboard-ready PNGs, a floating stack, drag-and-drop handoff, and built-in annotation or redaction without sending anything to the cloud.",
+    url: "https://github.com/UnitMax/SnipCaddy",
+    artHue: 24,
+  },
 ];
 
 function renderCards(gridId, items, kind) {
