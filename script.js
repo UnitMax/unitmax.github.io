@@ -91,36 +91,6 @@ function renderCards(gridId, items, kind) {
   }
 }
 
-function buildDialBezel() {
-  const svg = document.querySelector(".dial-bezel");
-  if (!svg) return;
-  const ns = "http://www.w3.org/2000/svg";
-  const total = 60;
-  const fragments = [];
-  for (let i = 0; i < total; i++) {
-    const angle = (i / total) * 360;
-    const isMajor = i % 5 === 0;
-    const isCardinal = i % 15 === 0;
-    const r1 = 96;
-    const r2 = isCardinal ? 80 : isMajor ? 86 : 91;
-    const rad = ((angle - 90) * Math.PI) / 180;
-    const x1 = (Math.cos(rad) * r1).toFixed(2);
-    const y1 = (Math.sin(rad) * r1).toFixed(2);
-    const x2 = (Math.cos(rad) * r2).toFixed(2);
-    const y2 = (Math.sin(rad) * r2).toFixed(2);
-    const w = isCardinal ? 1.6 : isMajor ? 1.1 : 0.6;
-    const opacity = isCardinal ? 0.9 : isMajor ? 0.65 : 0.35;
-    fragments.push(
-      `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke-width="${w}" opacity="${opacity}"/>`
-    );
-  }
-  fragments.push(
-    `<circle cx="0" cy="0" r="96" fill="none" stroke="currentColor" stroke-width="0.4" opacity="0.25"/>`
-  );
-  svg.innerHTML = fragments.join("");
-  svg.setAttribute("xmlns", ns);
-}
-
 function setupScrollSpy() {
   const links = Array.from(document.querySelectorAll(".topnav-link"));
   const sections = links
@@ -171,6 +141,5 @@ function setupReveal() {
 
 renderCards("games-grid", games, "game");
 renderCards("projects-grid", projects, "project");
-buildDialBezel();
 setupScrollSpy();
 setupReveal();
