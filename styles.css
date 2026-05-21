@@ -754,12 +754,6 @@ button {
 /* =========================================================
    About
    ========================================================= */
-.about-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
-  gap: clamp(1.25rem, 3.5vw, 3rem);
-  align-items: start;
-}
 .about-main {
   display: flex;
   flex-direction: column;
@@ -783,7 +777,6 @@ button {
   font-size: 1rem;
   line-height: 1.65;
   color: var(--text-soft);
-  max-width: 56ch;
 }
 .about-body em {
   color: var(--accent-soft);
@@ -812,63 +805,6 @@ button {
   border-color: rgba(109, 165, 255, 0.45);
   color: var(--accent);
   background: rgba(109, 165, 255, 0.06);
-}
-
-.about-aside {
-  padding: 1.05rem 1.1rem 1.15rem;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: linear-gradient(180deg, var(--surface) 0%, rgba(16, 22, 42, 0.6) 100%);
-  position: relative;
-}
-.about-aside::before {
-  content: "";
-  position: absolute;
-  top: -1px;
-  left: 16px;
-  width: 28px;
-  height: 1px;
-  background: var(--accent);
-}
-.aside-label {
-  margin: 0 0 0.85rem;
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  letter-spacing: 0.1em;
-  color: var(--accent);
-  text-transform: uppercase;
-}
-.meta-list {
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-.meta-row {
-  display: grid;
-  grid-template-columns: 5.5rem 1fr;
-  align-items: baseline;
-  gap: 1rem;
-  padding-bottom: 0.45rem;
-  border-bottom: 1px dashed var(--border);
-}
-.meta-row:last-child {
-  border-bottom: none;
-  padding-bottom: 0;
-}
-.meta-row dt {
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  color: var(--text-dim);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-}
-.meta-row dd {
-  margin: 0;
-  font-family: var(--font-mono);
-  font-size: 0.83rem;
-  color: var(--text-soft);
 }
 
 /* =========================================================
@@ -1230,9 +1166,6 @@ button {
   .hero {
     min-height: auto;
     padding-top: clamp(2.25rem, 6vw, 3.75rem);
-  }
-  .about-grid {
-    grid-template-columns: 1fr;
   }
 }
 
