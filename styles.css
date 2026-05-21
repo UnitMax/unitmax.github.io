@@ -14,14 +14,14 @@
   --accent: #2f5f60;
   --accent-soft: #e3ece7;
   --accent-warm: #9b7448;
-  --shadow: 0 18px 42px rgba(63, 49, 30, 0.08);
+  --shadow: 0 12px 28px rgba(63, 49, 30, 0.08);
 
   --font-display: "Space Grotesk", "Inter", system-ui, -apple-system, "Segoe UI",
     Roboto, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
 
-  --max-w: 1160px;
-  --gutter: clamp(1.25rem, 4vw, 2.75rem);
+  --max-w: 1080px;
+  --gutter: clamp(1rem, 3.2vw, 2.25rem);
   --radius: 8px;
   --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
 }
@@ -50,7 +50,7 @@ body {
   color: var(--ink);
   font-family: var(--font-display);
   font-size: 16px;
-  line-height: 1.55;
+  line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
@@ -101,8 +101,8 @@ button {
   display: grid;
   grid-template-columns: auto 1fr auto;
   align-items: center;
-  gap: 1.25rem;
-  padding: 0.95rem var(--gutter);
+  gap: 1rem;
+  padding: 0.65rem var(--gutter);
   background: rgba(243, 236, 223, 0.86);
   border-bottom: 1px solid rgba(184, 169, 149, 0.5);
   backdrop-filter: blur(18px);
@@ -112,7 +112,7 @@ button {
 .brand {
   display: inline-flex;
   align-items: center;
-  gap: 0.65rem;
+  gap: 0.5rem;
   font-family: var(--font-mono);
   font-size: 0.86rem;
   font-weight: 600;
@@ -120,8 +120,8 @@ button {
 
 .brand-mark {
   position: relative;
-  width: 24px;
-  height: 24px;
+  width: 21px;
+  height: 21px;
   border: 1px solid var(--ink);
   border-radius: 6px;
   background: var(--paper);
@@ -130,7 +130,7 @@ button {
 .brand-mark::after {
   content: "";
   position: absolute;
-  inset: 6px;
+  inset: 5px;
   border: 1px solid var(--accent);
   border-radius: 3px;
 }
@@ -148,8 +148,8 @@ button {
   justify-self: center;
   display: flex;
   align-items: center;
-  gap: 0.4rem;
-  padding: 0.28rem;
+  gap: 0.2rem;
+  padding: 0.18rem;
   border: 1px solid rgba(184, 169, 149, 0.55);
   border-radius: 999px;
   background: rgba(255, 250, 241, 0.62);
@@ -160,8 +160,8 @@ button {
 .topnav-link {
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
-  padding: 0.42rem 0.72rem;
+  gap: 0.28rem;
+  padding: 0.34rem 0.58rem;
   border-radius: 999px;
   color: var(--ink-soft);
   transition: background 180ms var(--ease), color 180ms var(--ease);
@@ -210,7 +210,7 @@ button {
 
 .section {
   position: relative;
-  padding: clamp(3rem, 6vw, 5.5rem) 0;
+  padding: clamp(2.15rem, 4.4vw, 3.8rem) 0;
   border-top: 1px solid var(--line);
 }
 
@@ -227,8 +227,8 @@ button {
 .section-head {
   display: flex;
   align-items: baseline;
-  gap: 0.85rem;
-  margin: 0 0 1.6rem;
+  gap: 0.65rem;
+  margin: 0 0 1rem;
 }
 
 .section-num {
@@ -240,7 +240,7 @@ button {
 .section-title {
   margin: 0;
   color: var(--ink);
-  font-size: clamp(2rem, 4.5vw, 3.25rem);
+  font-size: clamp(1.8rem, 4vw, 2.75rem);
   font-weight: 600;
   line-height: 1;
   letter-spacing: 0;
@@ -250,8 +250,8 @@ button {
   max-width: 760px;
   margin: 0;
   color: var(--ink-soft);
-  font-size: 1.08rem;
-  line-height: 1.7;
+  font-size: 1rem;
+  line-height: 1.58;
 }
 
 /* =========================================================
@@ -261,9 +261,9 @@ button {
   display: grid;
   grid-template-columns: minmax(0, 1.05fr) minmax(280px, 0.95fr);
   align-items: center;
-  gap: clamp(2rem, 7vw, 6rem);
-  min-height: min(720px, calc(100vh - 74px));
-  padding: clamp(3.5rem, 8vw, 7rem) 0 clamp(3rem, 6vw, 5rem);
+  gap: clamp(1.5rem, 4.8vw, 3.75rem);
+  min-height: min(600px, calc(100vh - 56px));
+  padding: clamp(2.3rem, 5.4vw, 4.5rem) 0 clamp(2rem, 4.4vw, 3.4rem);
 }
 
 .hero-inner {
@@ -274,7 +274,7 @@ button {
   display: inline-flex;
   align-items: center;
   gap: 0.6rem;
-  margin: 0 0 1.3rem;
+  margin: 0 0 0.85rem;
   color: var(--accent);
   font-family: var(--font-mono);
   font-size: 0.76rem;
@@ -296,7 +296,7 @@ button {
 .hero-title {
   margin: 0;
   color: var(--ink);
-  font-size: clamp(4.4rem, 13vw, 9.5rem);
+  font-size: clamp(3.85rem, 10.8vw, 8rem);
   font-weight: 700;
   line-height: 0.9;
   letter-spacing: 0;
@@ -304,23 +304,23 @@ button {
 
 .hero-sub {
   max-width: 620px;
-  margin: 1.45rem 0 0;
+  margin: 1rem 0 0;
   color: var(--ink-soft);
-  font-size: clamp(1.1rem, 2vw, 1.45rem);
-  line-height: 1.55;
+  font-size: clamp(1.05rem, 1.7vw, 1.25rem);
+  line-height: 1.48;
 }
 
 .hero-meta {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.55rem;
-  margin: 1.55rem 0 0;
+  gap: 0.4rem;
+  margin: 1rem 0 0;
   padding: 0;
   list-style: none;
 }
 
 .hero-meta li {
-  padding: 0.45rem 0.72rem;
+  padding: 0.34rem 0.6rem;
   border: 1px solid var(--line);
   border-radius: 999px;
   background: rgba(255, 250, 241, 0.72);
@@ -332,17 +332,17 @@ button {
 .hero-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.8rem;
-  margin: 2rem 0 0;
+  gap: 0.65rem;
+  margin: 1.35rem 0 0;
 }
 
 .btn {
   display: inline-flex;
-  min-height: 44px;
+  min-height: 40px;
   align-items: center;
   justify-content: center;
   gap: 0.55rem;
-  padding: 0.76rem 1rem;
+  padding: 0.64rem 0.9rem;
   border: 1px solid var(--ink);
   border-radius: 999px;
   font-size: 0.94rem;
@@ -386,7 +386,7 @@ button {
 
 .hero-visual {
   position: relative;
-  min-height: 420px;
+  min-height: 330px;
 }
 
 .hero-visual::before {
@@ -433,15 +433,15 @@ button {
 .about-main {
   display: flex;
   flex-direction: column;
-  gap: 1.05rem;
+  gap: 0.78rem;
 }
 
 .about-lede {
   margin: 0;
   color: var(--ink);
-  font-size: clamp(1.45rem, 2.8vw, 2.15rem);
+  font-size: clamp(1.28rem, 2.4vw, 1.85rem);
   font-weight: 500;
-  line-height: 1.28;
+  line-height: 1.22;
   letter-spacing: 0;
 }
 
@@ -453,8 +453,8 @@ button {
 .about-body {
   margin: 0;
   color: var(--ink-soft);
-  font-size: 1.02rem;
-  line-height: 1.75;
+  font-size: 0.98rem;
+  line-height: 1.62;
 }
 
 .about-body em {
@@ -465,14 +465,14 @@ button {
 .about-tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.45rem;
-  margin: 0.55rem 0 0;
+  gap: 0.34rem;
+  margin: 0.28rem 0 0;
   padding: 0;
   list-style: none;
 }
 
 .about-tags li {
-  padding: 0.38rem 0.66rem;
+  padding: 0.3rem 0.56rem;
   border: 1px solid var(--line);
   border-radius: 999px;
   background: rgba(255, 250, 241, 0.7);
@@ -485,7 +485,7 @@ button {
    Subsections
    ========================================================= */
 .subsection {
-  margin: 2.6rem 0 0;
+  margin: 1.85rem 0 0;
 }
 
 .subsection:first-of-type {
@@ -496,20 +496,20 @@ button {
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
-  gap: 1rem;
-  margin: 0 0 1rem;
+  gap: 0.75rem;
+  margin: 0 0 0.7rem;
 }
 
 .subsection-title {
   margin: 0;
   color: var(--ink);
-  font-size: 1.35rem;
+  font-size: 1.18rem;
   font-weight: 600;
   letter-spacing: 0;
 }
 
 .subsection-sub {
-  margin: 0.24rem 0 0;
+  margin: 0.12rem 0 0;
   color: var(--muted);
   font-size: 0.95rem;
 }
@@ -528,7 +528,7 @@ button {
 .card-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(245px, 1fr));
-  gap: 1rem;
+  gap: 0.75rem;
 }
 
 .card {
@@ -561,7 +561,7 @@ button {
 .card-art {
   --art-color: hsl(var(--art-hue) 34% 38%);
   position: relative;
-  height: 116px;
+  height: 86px;
   overflow: hidden;
   border-bottom: 1px solid var(--line);
   background: var(--paper-soft);
@@ -570,25 +570,25 @@ button {
 .card-art::before {
   content: "";
   position: absolute;
-  top: 28px;
-  left: 24px;
-  width: calc(100% - 48px);
+  top: 20px;
+  left: 20px;
+  width: calc(100% - 40px);
   height: 1px;
   background: var(--art-color);
   opacity: 0.4;
   box-shadow:
-    0 24px 0 var(--art-color),
-    44px 48px 0 var(--art-color),
-    102px 72px 0 var(--art-color);
+    0 18px 0 var(--art-color),
+    38px 36px 0 var(--art-color),
+    86px 54px 0 var(--art-color);
 }
 
 .card-art::after {
   content: "";
   position: absolute;
-  right: 26px;
-  bottom: 20px;
-  width: 74px;
-  height: 38px;
+  right: 20px;
+  bottom: 14px;
+  width: 58px;
+  height: 30px;
   border: 1px solid var(--art-color);
   border-radius: 6px;
   opacity: 0.38;
@@ -596,10 +596,10 @@ button {
 
 .card-tag {
   position: absolute;
-  top: 0.75rem;
-  left: 0.75rem;
+  top: 0.55rem;
+  left: 0.55rem;
   z-index: 1;
-  padding: 0.28rem 0.46rem;
+  padding: 0.22rem 0.4rem;
   border: 1px solid rgba(184, 169, 149, 0.7);
   border-radius: 999px;
   background: rgba(255, 250, 241, 0.78);
@@ -614,29 +614,29 @@ button {
   display: flex;
   flex: 1;
   flex-direction: column;
-  padding: 1rem;
+  padding: 0.82rem;
 }
 
 .card-title {
   margin: 0;
   color: var(--ink);
-  font-size: 1.08rem;
+  font-size: 1rem;
   font-weight: 600;
   letter-spacing: 0;
 }
 
 .card-meta {
-  margin: 0.25rem 0 0;
+  margin: 0.16rem 0 0;
   color: var(--accent-warm);
   font-family: var(--font-mono);
   font-size: 0.73rem;
 }
 
 .card-desc {
-  margin: 0.75rem 0 0;
+  margin: 0.5rem 0 0;
   color: var(--ink-soft);
   font-size: 0.92rem;
-  line-height: 1.62;
+  line-height: 1.5;
 }
 
 .card-cta {
@@ -644,7 +644,7 @@ button {
   align-items: center;
   gap: 0.36rem;
   margin-top: auto;
-  padding-top: 1rem;
+  padding-top: 0.65rem;
   color: var(--accent);
   font-family: var(--font-mono);
   font-size: 0.75rem;
@@ -667,7 +667,7 @@ button {
   display: flex;
   flex-direction: column;
   gap: 0;
-  margin: 1.8rem 0 0;
+  margin: 1.15rem 0 0;
   padding: 0;
   list-style: none;
   border-top: 1px solid var(--line);
@@ -677,8 +677,8 @@ button {
   display: grid;
   grid-template-columns: auto minmax(8rem, auto) 1fr auto;
   align-items: center;
-  gap: 1rem;
-  min-height: 74px;
+  gap: 0.8rem;
+  min-height: 58px;
   border-bottom: 1px solid var(--line);
 }
 
@@ -729,7 +729,7 @@ button {
    Footer
    ========================================================= */
 .footer {
-  padding: 1.7rem 0 2.4rem;
+  padding: 1.15rem 0 1.65rem;
   border-top: 1px solid var(--line);
 }
 
@@ -805,7 +805,7 @@ button {
   }
 
   .hero-visual {
-    min-height: 300px;
+    min-height: 250px;
     opacity: 0.82;
   }
 }
@@ -813,7 +813,7 @@ button {
 @media (max-width: 760px) {
   .topbar {
     grid-template-columns: auto auto;
-    padding: 0.75rem var(--gutter);
+    padding: 0.58rem var(--gutter);
   }
 
   .topnav {
@@ -833,7 +833,7 @@ button {
   }
 
   .hero {
-    padding-top: 2.5rem;
+    padding-top: 1.75rem;
   }
 
   .hero-visual {
@@ -841,7 +841,7 @@ button {
   }
 
   .hero-title {
-    font-size: clamp(4rem, 19vw, 7rem);
+    font-size: clamp(3.2rem, 17vw, 5.6rem);
   }
 
   .subsection-head {
@@ -852,7 +852,7 @@ button {
   .contact-row {
     grid-template-columns: auto 1fr;
     gap: 0.55rem 0.9rem;
-    padding: 1rem 0;
+    padding: 0.7rem 0;
   }
 
   .contact-row-rule {

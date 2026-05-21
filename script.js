@@ -17,12 +17,6 @@ const games = [
     url: "#",
     artHue: 236,
   },
-  {
-    title: "Coming Soon",
-    genre: "t.b.d.",
-    url: "#",
-    artHue: 158,
-  },
 ];
 
 const projects = [
