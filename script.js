@@ -85,55 +85,73 @@ function renderCards(gridId, items, kind) {
   }
 }
 
-function setupScrollSpy() {
-  const links = Array.from(document.querySelectorAll(".topnav-link"));
-  const sections = links
-    .map((link) => document.getElementById(link.dataset.target))
-    .filter(Boolean);
-  if (!links.length || !sections.length) return;
+function setupSectionViews() {
+  const links = Array.from(document.querySelectorAll(".side-nav-link"));
+  const homeLink = document.querySelector(".brand[data-target='home']");
+  const views = Array.from(document.querySelectorAll(".hero, .section"));
+  if (!links.length || !views.length) return;
+
+  const viewById = new Map(views.map((view) => [view.id, view]));
+  const viewLinks = Array.from(document.querySelectorAll("a[href^='#']")).filter(
+    (link) => viewById.has(link.dataset.target || link.hash.replace("#", ""))
+  );
+
+  const getRequestedView = () => {
+    const id = window.location.hash.replace("#", "");
+    return viewById.has(id) ? id : "home";
+  };
 
   const setActive = (id) => {
     links.forEach((link) =>
       link.classList.toggle("is-active", link.dataset.target === id)
     );
+    homeLink?.classList.toggle("is-active", id === "home");
   };
 
-  const observer = new IntersectionObserver(
-    (entries) => {
-      const visible = entries
-        .filter((e) => e.isIntersecting)
-        .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
-      if (visible.length) setActive(visible[0].target.id);
-    },
-    {
-      rootMargin: "-45% 0px -50% 0px",
-      threshold: [0, 0.25, 0.5, 0.75, 1],
-    }
-  );
+  const showView = (id, options = {}) => {
+    const nextId = viewById.has(id) ? id : "home";
+    views.forEach((view) => {
+      const isActive = view.id === nextId;
+      view.hidden = !isActive;
+      view.classList.toggle("is-active-view", isActive);
+      if (isActive) view.classList.add("is-shown");
+    });
+    setActive(nextId);
 
-  sections.forEach((s) => observer.observe(s));
+    if (options.updateUrl !== false) {
+      const nextUrl =
+        nextId === "home"
+          ? `${window.location.pathname}${window.location.search}`
+          : `#${nextId}`;
+      history.pushState({ view: nextId }, "", nextUrl);
+    }
+
+    const previousScrollBehavior = document.documentElement.style.scrollBehavior;
+    document.documentElement.style.scrollBehavior = "auto";
+    window.scrollTo(0, 0);
+    document.documentElement.style.scrollBehavior = previousScrollBehavior;
+  };
+
+  viewLinks.forEach((link) => {
+    link.addEventListener("click", (event) => {
+      event.preventDefault();
+      showView(link.dataset.target || link.hash.replace("#", ""));
+    });
+  });
+
+  window.addEventListener("popstate", () => {
+    showView(getRequestedView(), { updateUrl: false });
+  });
+
+  showView(getRequestedView(), { updateUrl: false });
 }
 
 function setupReveal() {
   const targets = document.querySelectorAll(".section");
   targets.forEach((el) => el.classList.add("reveal"));
-
-  const obs = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((e) => {
-        if (e.isIntersecting) {
-          e.target.classList.add("is-shown");
-          obs.unobserve(e.target);
-        }
-      });
-    },
-    { threshold: 0.12 }
-  );
-
-  targets.forEach((el) => obs.observe(el));
 }
 
 renderCards("games-grid", games, "game");
 renderCards("projects-grid", projects, "project");
-setupScrollSpy();
 setupReveal();
+setupSectionViews();
