@@ -29,6 +29,14 @@ const projects = [
     artHue: 126,
   },
   {
+    title: "PictBake",
+    genre: "Chrome Extension",
+    description:
+      "Privacy-friendly image conversion for turning WebP files into PNG or JPEG directly in Chrome, offline and without sending anything to external services.",
+    url: "https://github.com/UnitMax/PictBake",
+    artHue: 204,
+  },
+  {
     title: "SnipCaddy",
     genre: "Windows Screenshot Utility",
     description:
