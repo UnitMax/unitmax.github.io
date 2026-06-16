@@ -70,18 +70,6 @@
     ultra:  { iterBase: 480, iterK: 64, interactiveScale: 1.00, stillScale: 1.00, stillAA: 2 },
   };
 
-  /* ----------------------------------------------------------------- *
-   * Curated tour stops.                                                *
-   * ----------------------------------------------------------------- */
-  const TOUR = [
-    { cx: -0.743643887037151, cy: 0.131825904205330, span: 1.6e-3 }, // Seahorse valley
-    { cx: 0.2925755,          cy: 0.0149977,         span: 9.0e-3 }, // Elephant valley
-    { cx: -0.74364990,        cy: 0.13188204,        span: 9.0e-5 }, // Double spiral
-    { cx: -1.7687788,         cy: 0.0017388,         span: 4.0e-4 }, // Mini Mandelbrot
-    { cx: -0.235124997,       cy: 0.827215,          span: 2.2e-3 }, // Dendrite
-    { cx: -0.16070135,        cy: 1.0375665,         span: 2.4e-3 }, // Spiral fan
-  ];
-
   /* ----------------------------------------------------------------- */
   const DEFAULT = { cx: -0.6, cy: 0.0, span: 2.6 };
   const MIN_SPAN = 6e-12;     // ~1e11x magnification (df64 limit)
@@ -183,7 +171,6 @@
     juliaLive: false,
     juliaX: -0.8, juliaY: 0.156,
     juliaTX: -0.8, juliaTY: 0.156,
-    tour: false,
   };
   let savedView = null;
 
@@ -244,7 +231,7 @@
    * Easing of the view toward the target.                              *
    * ----------------------------------------------------------------- */
   function stepEasing() {
-    const e = state.tour ? 0.045 : 0.16;
+    const e = 0.16;
     const ls = Math.log(view.span);
     const lt = Math.log(target.span);
     const dls = lt - ls;
@@ -335,7 +322,7 @@
   }
 
   /* ----------------------------------------------------------------- *
-   * View / tour control.                                               *
+   * View control.                                                      *
    * ----------------------------------------------------------------- */
   function setView(cx, cy, span, snap) {
     target.cx = cx; target.cy = cy; target.span = clamp(span, minSpan, MAX_SPAN);
@@ -343,51 +330,7 @@
     markInteract();
   }
 
-  let tourIdx = 0;
-  let tourHoldUntil = 0;
-
-  function gotoTour(i) {
-    const t = TOUR[i];
-    target.cx = t.cx; target.cy = t.cy;
-    target.span = clamp(t.span, minSpan, MAX_SPAN);
-  }
-
-  function startTour() {
-    if (state.julia) setJulia(false);
-    state.tour = true;
-    tourIdx = 0;
-    tourHoldUntil = 0;
-    gotoTour(0);
-    updateUI();
-    markInteract();
-  }
-
-  function cancelTour() {
-    if (state.tour) {
-      state.tour = false;
-      tourHoldUntil = 0;
-      updateUI();
-    }
-  }
-
-  function stepTour() {
-    const arrived =
-      Math.abs(Math.log(view.span / target.span)) < 0.02 &&
-      Math.abs(view.cx - target.cx) < view.span * 0.05 &&
-      Math.abs(view.cy - target.cy) < view.span * 0.05;
-    if (!arrived) return;
-    const now = performance.now();
-    if (tourHoldUntil === 0) {
-      tourHoldUntil = now + 2800;
-    } else if (now > tourHoldUntil) {
-      tourHoldUntil = 0;
-      tourIdx = (tourIdx + 1) % TOUR.length;
-      gotoTour(tourIdx);
-    }
-  }
-
   function reset() {
-    cancelTour();
     if (state.julia) setJulia(false);
     state.colorShift = 0;
     setView(DEFAULT.cx, DEFAULT.cy, DEFAULT.span, false);
@@ -404,7 +347,6 @@
     canvas.setPointerCapture(e.pointerId);
     pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
     moved = false;
-    cancelTour();
     if (state.julia && state.juliaLive) pinJulia();
     if (pointers.size === 2) pinchPrev = null;
   });
@@ -465,7 +407,6 @@
     "wheel",
     function (e) {
       e.preventDefault();
-      cancelTour();
       const rect = canvas.getBoundingClientRect();
       const w = screenToWorld(e.clientX - rect.left, e.clientY - rect.top, rect.width, rect.height, target);
       let dy = e.deltaY;
@@ -484,7 +425,6 @@
 
   canvas.addEventListener("dblclick", function (e) {
     if (state.julia && state.juliaLive) return;
-    cancelTour();
     const rect = canvas.getBoundingClientRect();
     const w = screenToWorld(e.clientX - rect.left, e.clientY - rect.top, rect.width, rect.height, target);
     const newSpan = clamp(target.span * 0.4, minSpan, MAX_SPAN);
@@ -500,7 +440,6 @@
     switch (e.key.toLowerCase()) {
       case "r": reset(); break;
       case "j": setJulia(!state.julia); break;
-      case "t": state.tour ? cancelTour() : startTour(); break;
       case "f": toggleFullscreen(); break;
       case "h":
       case "escape": toggleCollapse(); break;
@@ -523,7 +462,6 @@
     julia: document.getElementById("btn-julia"),
     juliaLive: document.getElementById("btn-julia-live"),
     shimmer: document.getElementById("btn-shimmer"),
-    tour: document.getElementById("btn-tour"),
     reset: document.getElementById("btn-reset"),
     collapse: document.getElementById("btn-collapse"),
     fullscreen: document.getElementById("btn-fullscreen"),
@@ -574,9 +512,6 @@
     updateUI();
     markInteract();
   });
-  els.tour && els.tour.addEventListener("click", () => {
-    state.tour ? cancelTour() : startTour();
-  });
   els.reset && els.reset.addEventListener("click", reset);
   els.collapse && els.collapse.addEventListener("click", toggleCollapse);
   els.fullscreen && els.fullscreen.addEventListener("click", toggleFullscreen);
@@ -607,7 +542,6 @@
     els.juliaLive && els.juliaLive.classList.toggle("active", state.julia && state.juliaLive);
     els.juliaRow && els.juliaRow.classList.toggle("disabled", !state.julia);
     els.shimmer && els.shimmer.classList.toggle("active", state.shimmer);
-    els.tour && els.tour.classList.toggle("active", state.tour);
   }
 
   /* ----------------------------------------------------------------- *
@@ -661,10 +595,9 @@
       }
     }
 
-    if (state.tour) stepTour();
     if (state.shimmer) { state.colorShift += 0.0012; needsRender = true; }
 
-    const active = animating || juliaMoving || state.tour || state.shimmer;
+    const active = animating || juliaMoving || state.shimmer;
 
     if (active && mode !== "interactive") { mode = "interactive"; applyRenderSize(); }
     if (!active && mode === "interactive" && now - lastInteract > IDLE_MS) {
