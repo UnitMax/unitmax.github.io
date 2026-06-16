@@ -12,9 +12,9 @@ const games = [
     artHue: 288,
   },
   {
-    title: "Coming Soon",
-    genre: "t.b.d.",
-    url: "#",
+    title: "Mandelbrot Set",
+    genre: "GPU Visualizer",
+    url: "./games/mandelbrot/",
     artHue: 236,
   },
 ];

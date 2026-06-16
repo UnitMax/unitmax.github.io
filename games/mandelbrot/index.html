@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="theme-color" content="#05070b" />
+    <meta
+      name="description"
+      content="A GPU-accelerated, real-time Mandelbrot set explorer. Pan, zoom deep, switch palettes, morph into Julia sets and take a cinematic tour."
+    />
+    <title>Mandelbrot — GPU Explorer</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2305070b'/%3E%3Ccircle cx='17' cy='16' r='7.5' fill='none' stroke='%234fd0e6' stroke-width='2'/%3E%3Ccircle cx='8.5' cy='16' r='2.4' fill='none' stroke='%234fd0e6' stroke-width='1.6'/%3E%3C/svg%3E"
+    />
+    <link rel="stylesheet" href="../../fonts/fonts.css" />
+    <link rel="stylesheet" href="./styles.css" />
+    <script src="./shaders.js" defer></script>
+    <script src="./script.js" defer></script>
+  </head>
+  <body>
+    <canvas id="gl"></canvas>
+    <div class="vignette" aria-hidden="true"></div>
+
+    <div id="fallback" hidden>
+      <div class="fallback-card">
+        <h1>WebGL unavailable</h1>
+        <p>
+          This explorer needs WebGL, which your browser or device doesn't seem
+          to support. Try a recent version of Chrome, Firefox, Safari or Edge.
+        </p>
+        <a href="../../">← back to unitmax</a>
+      </div>
+    </div>
+
+    <header class="topbar">
+      <a class="brand" href="../../" aria-label="Back to unitmax">
+        <span class="brand-mark">◆</span>
+        <span class="brand-text">mandelbrot</span>
+      </a>
+      <div class="top-actions">
+        <button id="btn-fullscreen" class="icon-btn" type="button" title="Fullscreen (F)" aria-label="Toggle fullscreen">⤢</button>
+        <button id="btn-collapse" class="icon-btn" type="button" title="Hide controls (H)" aria-label="Toggle controls">⊟</button>
+      </div>
+    </header>
+
+    <aside id="panel" class="panel">
+      <section class="group">
+        <span class="label">Palette</span>
+        <div id="palettes" class="swatches"></div>
+      </section>
+
+      <section class="group">
+        <span class="label">Quality</span>
+        <div id="quality" class="segmented">
+          <button type="button" data-q="low">Low</button>
+          <button type="button" data-q="medium">Med</button>
+          <button type="button" data-q="high">High</button>
+          <button type="button" data-q="ultra">Ultra</button>
+        </div>
+      </section>
+
+      <section class="group">
+        <span class="label">Explore</span>
+        <div class="btn-row">
+          <button id="btn-julia" class="pill" type="button">Julia</button>
+          <button id="btn-tour" class="pill" type="button">Tour</button>
+        </div>
+        <div id="julia-row" class="btn-row disabled">
+          <button id="btn-julia-live" class="pill ghost" type="button">Follow cursor — click to pin</button>
+        </div>
+        <div class="btn-row">
+          <button id="btn-shimmer" class="pill" type="button">Shimmer</button>
+          <button id="btn-reset" class="pill" type="button">Reset</button>
+        </div>
+      </section>
+    </aside>
+
+    <div class="readout" id="readout">
+      <div class="ro"><span class="ro-k">center</span><span id="r-coord" class="ro-v">—</span></div>
+      <div class="ro"><span class="ro-k">zoom</span><span id="r-zoom" class="ro-v">×1</span></div>
+      <div class="ro"><span class="ro-k">iter</span><span id="r-iter" class="ro-v">—</span></div>
+      <div class="ro"><span class="ro-k">fps</span><span id="r-fps" class="ro-v">—</span></div>
+    </div>
+
+    <div class="hint" id="hint">
+      <span>drag to pan</span><i>·</i><span>scroll / pinch to zoom</span><i>·</i>
+      <span>double-click to dive</span><i>·</i><span><b>J</b> julia</span><i>·</i>
+      <span><b>T</b> tour</span><i>·</i><span><b>H</b> hide</span>
+    </div>
+  </body>
+</html>
