@@ -3,19 +3,19 @@ const games = [
     title: "Pure Pour",
     genre: "Interactive Puzzle",
     url: "./games/pure-pour/",
-    artHue: 196,
+    artHue: 205,
   },
   {
     title: "Coming Soon",
     genre: "t.b.d.",
     url: "#",
-    artHue: 288,
+    artHue: 258,
   },
   {
     title: "Coming Soon",
     genre: "t.b.d.",
     url: "#",
-    artHue: 236,
+    artHue: 230,
   },
 ];
 
@@ -26,7 +26,7 @@ const projects = [
     description:
       "Open-source Chrome tweaks that add missing Google Maps shortcuts: send selected webpage text to Maps from the context menu, or open a Google Search query in Maps from a new button beside the search box.",
     url: "https://github.com/UnitMax/LostButtonFoundry",
-    artHue: 126,
+    artHue: 168,
   },
   {
     title: "PictBake",
@@ -34,7 +34,7 @@ const projects = [
     description:
       "Privacy-friendly image conversion for turning WebP files into PNG or JPEG directly in Chrome, offline and without sending anything to external services.",
     url: "https://github.com/UnitMax/PictBake",
-    artHue: 204,
+    artHue: 210,
   },
   {
     title: "SnipCaddy",
@@ -42,7 +42,7 @@ const projects = [
     description:
       "A tray-first, fully private C# / WPF screenshot caddy for fast region captures, clipboard-ready PNGs, a floating stack, drag-and-drop handoff, and built-in annotation or redaction without sending anything to the cloud.",
     url: "https://github.com/UnitMax/SnipCaddy",
-    artHue: 24,
+    artHue: 262,
   },
 ];
 
@@ -63,7 +63,7 @@ function renderCards(gridId, items, kind) {
         : "Launch";
 
       const inner = `
-        <div class="card-art" style="--art-hue:${item.artHue};" aria-hidden="true">
+        <div class="card-art" aria-hidden="true">
           <span class="card-tag">${tag}</span>
         </div>
         <div class="card-body">
@@ -77,12 +77,14 @@ function renderCards(gridId, items, kind) {
         </div>
       `;
 
+      const hue = `style="--art-hue:${item.artHue};"`;
+
       if (isPlaceholder) {
-        return `<article class="card is-disabled" aria-disabled="true">${inner}</article>`;
+        return `<article class="card is-disabled" ${hue} aria-disabled="true">${inner}</article>`;
       }
 
       const target = isExternal ? ' target="_blank" rel="noopener"' : "";
-      return `<a class="card" href="${item.url}"${target} aria-label="${item.title}">${inner}</a>`;
+      return `<a class="card" ${hue} href="${item.url}"${target} aria-label="${item.title}">${inner}</a>`;
     })
     .join("");
 
@@ -122,7 +124,6 @@ function setupSectionViews() {
       const isActive = view.id === nextId;
       view.hidden = !isActive;
       view.classList.toggle("is-active-view", isActive);
-      if (isActive) view.classList.add("is-shown");
     });
     setActive(nextId);
 
@@ -154,12 +155,6 @@ function setupSectionViews() {
   showView(getRequestedView(), { updateUrl: false });
 }
 
-function setupReveal() {
-  const targets = document.querySelectorAll(".section");
-  targets.forEach((el) => el.classList.add("reveal"));
-}
-
 renderCards("games-grid", games, "game");
 renderCards("projects-grid", projects, "project");
-setupReveal();
 setupSectionViews();
