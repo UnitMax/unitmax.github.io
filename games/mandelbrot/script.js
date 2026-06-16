@@ -1,6 +1,11 @@
 /*
  * Mandelbrot visualizer — WebGL engine + UI.
  * Pure vanilla JS, no frameworks, no build step. Works from file:// or http.
+ *
+ * Three render paths, picked by zoom depth / capability:
+ *   - fast   : single-precision direct iteration (shallow), WebGL1/2
+ *   - perturb: perturbation theory + high-precision reference orbit (deep), WebGL2
+ *   - df64   : emulated double precision (deep fallback when no WebGL2)
  */
 (function () {
   "use strict";
@@ -64,15 +69,16 @@
    * Quality presets.                                                   *
    * ----------------------------------------------------------------- */
   const QUALITY = {
-    low:    { iterBase: 140, iterK: 26, interactiveScale: 0.45, stillScale: 0.85, stillAA: 1 },
-    medium: { iterBase: 220, iterK: 38, interactiveScale: 0.60, stillScale: 1.00, stillAA: 1 },
-    high:   { iterBase: 320, iterK: 50, interactiveScale: 0.75, stillScale: 1.00, stillAA: 2 },
-    ultra:  { iterBase: 480, iterK: 64, interactiveScale: 1.00, stillScale: 1.00, stillAA: 2 },
+    low:    { iterBase: 140, iterK: 26, interactiveScale: 0.45, stillScale: 0.85, stillAA: 1, deepCap: 2500,  interCap: 900 },
+    medium: { iterBase: 220, iterK: 38, interactiveScale: 0.60, stillScale: 1.00, stillAA: 1, deepCap: 5000,  interCap: 1500 },
+    high:   { iterBase: 320, iterK: 50, interactiveScale: 0.75, stillScale: 1.00, stillAA: 2, deepCap: 9000,  interCap: 2500 },
+    ultra:  { iterBase: 480, iterK: 64, interactiveScale: 1.00, stillScale: 1.00, stillAA: 2, deepCap: 16000, interCap: 4000 },
   };
 
   /* ----------------------------------------------------------------- */
   const DEFAULT = { cx: -0.6, cy: 0.0, span: 2.6 };
-  const MIN_SPAN = 6e-12;     // ~1e11x magnification (df64 limit)
+  const MIN_SPAN_DF64 = 6e-12;     // emulated-double limit (WebGL1 deep)
+  const MIN_SPAN_PERTURB = 1e-32;  // perturbation limit (~1e32x, float32 delta range)
   const MAX_SPAN = 6.0;
   const DEEP_THRESHOLD = 1.0e-4;
   const IDLE_MS = 140;
@@ -92,6 +98,9 @@
     if (fallback) fallback.hidden = false;
     return;
   }
+
+  const isWebGL2 =
+    typeof WebGL2RenderingContext !== "undefined" && gl instanceof WebGL2RenderingContext;
 
   // highp probe — fall back to mediump if the device lacks high float precision.
   let precWord = "highp";
@@ -113,10 +122,8 @@
     return sh;
   }
 
-  function buildProgram(deep) {
-    let fsrc = mbFragSource(deep);
-    if (precWord !== "highp") fsrc = fsrc.replace(/highp/g, "mediump");
-    const vs = compile(gl.VERTEX_SHADER, MB_VERT);
+  function linkProgram(vsrc, fsrc, uniformNames) {
+    const vs = compile(gl.VERTEX_SHADER, vsrc);
     const fs = compile(gl.FRAGMENT_SHADER, fsrc);
     if (!vs || !fs) return null;
     const program = gl.createProgram();
@@ -127,24 +134,47 @@
       console.error("Program link failed:\n" + gl.getProgramInfoLog(program));
       return null;
     }
-    const uniforms = [
-      "u_resolution", "u_centerX", "u_centerY", "u_span", "u_maxIter",
-      "u_aa", "u_julia", "u_juliaX", "u_juliaY", "u_colorDensity",
-      "u_colorShift", "u_stops", "u_interior",
-    ];
     const loc = { a_pos: gl.getAttribLocation(program, "a_pos") };
-    uniforms.forEach((u) => { loc[u] = gl.getUniformLocation(program, u); });
+    uniformNames.forEach((u) => { loc[u] = gl.getUniformLocation(program, u); });
     return { program: program, loc: loc };
   }
 
-  const progFast = buildProgram(false);
-  const progDeep = buildProgram(true);
+  function buildDirect(deep) {
+    let fsrc = mbFragSource(deep);
+    if (precWord !== "highp") fsrc = fsrc.replace(/highp/g, "mediump");
+    return linkProgram(MB_VERT, fsrc, [
+      "u_resolution", "u_centerX", "u_centerY", "u_span", "u_maxIter",
+      "u_aa", "u_julia", "u_juliaX", "u_juliaY", "u_colorDensity",
+      "u_colorShift", "u_stops", "u_interior",
+    ]);
+  }
+
+  const progFast = buildDirect(false);
+  const progDeep = buildDirect(true);
   if (!progFast) {
     if (fallback) fallback.hidden = false;
     return;
   }
-  // If df64 program fails, stay shallow.
-  const minSpan = progDeep ? MIN_SPAN : 8e-6;
+
+  const progPerturb = isWebGL2
+    ? linkProgram(MB_VERT_300, MB_FRAG_PERTURB, [
+        "u_resolution", "u_spanHL", "u_maxIter", "u_aa", "u_refLength",
+        "u_refTex", "u_colorDensity", "u_colorShift", "u_stops", "u_interior",
+      ])
+    : null;
+
+  const minSpan = progPerturb ? MIN_SPAN_PERTURB : (progDeep ? MIN_SPAN_DF64 : 8e-6);
+
+  // Reference-orbit texture (perturbation path).
+  let refTex = null;
+  if (progPerturb) {
+    refTex = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, refTex);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  }
 
   // Full-screen quad.
   const quadBuf = gl.createBuffer();
@@ -156,10 +186,12 @@
   );
 
   /* ----------------------------------------------------------------- *
-   * State.                                                             *
+   * State.  The view center is high-precision (BigInt fixed-point at   *
+   * scale 2^P) so pan/zoom stays exact at any depth; span is a double. *
    * ----------------------------------------------------------------- */
-  const view = { cx: DEFAULT.cx, cy: DEFAULT.cy, span: DEFAULT.span * 1.7 };
-  const target = { cx: DEFAULT.cx, cy: DEFAULT.cy, span: DEFAULT.span };
+  let P = neededPrecision(DEFAULT.span, DEFAULT.span);
+  const view = { x: doubleToFixed(DEFAULT.cx, P), y: doubleToFixed(DEFAULT.cy, P), span: DEFAULT.span * 1.7 };
+  const target = { x: doubleToFixed(DEFAULT.cx, P), y: doubleToFixed(DEFAULT.cy, P), span: DEFAULT.span };
 
   const state = {
     paletteIndex: 0,
@@ -205,7 +237,7 @@
   }
 
   /* ----------------------------------------------------------------- *
-   * Math helpers.                                                      *
+   * Math / precision helpers.                                          *
    * ----------------------------------------------------------------- */
   function clamp(v, lo, hi) { return v < lo ? lo : v > hi ? hi : v; }
 
@@ -214,17 +246,46 @@
     return [hi, v - hi];
   }
 
-  function screenToWorld(px, py, w, h, v) {
-    const uvx = (px - 0.5 * w) / h;
-    const uvy = (0.5 * h - py) / h;
-    return { x: v.cx + uvx * v.span, y: v.cy + uvy * v.span };
+  // normalized coords: x in [-aspect/2..], y in [-0.5,0.5], +y up
+  function uvAt(px, py, w, h) {
+    return { x: (px - 0.5 * w) / h, y: (0.5 * h - py) / h };
+  }
+
+  function centerCx() { return fixedToDouble(view.x, P); }
+  function centerCy() { return fixedToDouble(view.y, P); }
+
+  // grow/shrink working precision, rescaling the BigInt centers in place
+  function setPrecision(newP) {
+    if (newP === P) return;
+    if (newP > P) {
+      const d = BigInt(newP - P);
+      view.x <<= d; view.y <<= d; target.x <<= d; target.y <<= d;
+    } else {
+      const d = BigInt(P - newP);
+      view.x >>= d; view.y >>= d; target.x >>= d; target.y >>= d;
+    }
+    P = newP;
+  }
+
+  function adaptPrecision() {
+    setPrecision(neededPrecision(Math.min(view.span, target.span), DEFAULT.span));
+  }
+
+  // Julia uses the direct shaders (no perturbation), so it caps at the
+  // emulated-double / float depth limit.
+  function currentMinSpan() {
+    if (state.julia) return progDeep ? MIN_SPAN_DF64 : 8e-6;
+    return minSpan;
   }
 
   function currentMaxIter() {
     const q = QUALITY[state.quality];
     const mag = DEFAULT.span / view.span;
-    const it = q.iterBase + q.iterK * Math.max(0, Math.log2(mag));
-    return Math.round(clamp(it, 80, 2000));
+    let it = q.iterBase + q.iterK * Math.max(0, Math.log2(mag));
+    const deep = !state.julia && progPerturb && view.span < DEEP_THRESHOLD;
+    it = clamp(it, 80, deep ? q.deepCap : 2000);
+    if (mode !== "still") it = Math.min(it, q.interCap);
+    return Math.round(it);
   }
 
   /* ----------------------------------------------------------------- *
@@ -235,51 +296,107 @@
     const ls = Math.log(view.span);
     const lt = Math.log(target.span);
     const dls = lt - ls;
-    const dcx = target.cx - view.cx;
-    const dcy = target.cy - view.cy;
+    const dxF = fixedToDouble(target.x - view.x, P);
+    const dyF = fixedToDouble(target.y - view.y, P);
 
     const spanClose = Math.abs(dls) < 1e-4;
-    const cxClose = Math.abs(dcx) < view.span * 1e-4;
-    const cyClose = Math.abs(dcy) < view.span * 1e-4;
+    const cxClose = Math.abs(dxF) < view.span * 1e-4;
+    const cyClose = Math.abs(dyF) < view.span * 1e-4;
     if (spanClose && cxClose && cyClose) {
-      view.cx = target.cx; view.cy = target.cy; view.span = target.span;
+      view.x = target.x; view.y = target.y; view.span = target.span;
       return false;
     }
     view.span = Math.exp(ls + dls * e);
-    view.cx += dcx * e;
-    view.cy += dcy * e;
+    view.x += doubleToFixed(dxF * e, P);
+    view.y += doubleToFixed(dyF * e, P);
     return true;
+  }
+
+  /* ----------------------------------------------------------------- *
+   * Reference orbit (perturbation). Recomputed when the center, depth  *
+   * precision, or required iteration count changes.                    *
+   * ----------------------------------------------------------------- */
+  let refLengthVal = 0;
+  const orbitState = { x: null, y: null, P: -1, maxIter: -1 };
+
+  function ensureReferenceOrbit(maxIter) {
+    if (orbitState.x === view.x && orbitState.y === view.y &&
+        orbitState.P === P && orbitState.maxIter >= maxIter) return;
+    const orb = computeReferenceOrbit(view.x, view.y, P, maxIter);
+    const M = Math.max(2, orb.length);
+    const w = Math.min(2048, M);
+    const h = Math.ceil(M / w);
+    // pack each Z as double-float: (Zx_hi, Zx_lo, Zy_hi, Zy_lo)
+    const tex = new Float32Array(w * h * 4);
+    for (let k = 0; k < orb.length; k++) {
+      const zx = orb.data[2 * k], zy = orb.data[2 * k + 1];
+      const xh = Math.fround(zx), yh = Math.fround(zy);
+      tex[4 * k] = xh; tex[4 * k + 1] = zx - xh;
+      tex[4 * k + 2] = yh; tex[4 * k + 3] = zy - yh;
+    }
+    gl.bindTexture(gl.TEXTURE_2D, refTex);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA32F, w, h, 0, gl.RGBA, gl.FLOAT, tex);
+    refLengthVal = M;
+    orbitState.x = view.x; orbitState.y = view.y;
+    orbitState.P = P; orbitState.maxIter = maxIter;
   }
 
   /* ----------------------------------------------------------------- *
    * Render.                                                            *
    * ----------------------------------------------------------------- */
-  function render() {
-    const deep = progDeep && view.span < DEEP_THRESHOLD;
-    const P = deep ? progDeep : progFast;
-    const L = P.loc;
-    gl.useProgram(P.program);
+  function bindQuad(L) {
+    gl.bindBuffer(gl.ARRAY_BUFFER, quadBuf);
+    gl.enableVertexAttribArray(L.a_pos);
+    gl.vertexAttribPointer(L.a_pos, 2, gl.FLOAT, false, 0, 0);
+  }
 
+  function setShared(L) {
     gl.uniform2f(L.u_resolution, canvas.width, canvas.height);
-    const cxd = split(view.cx), cyd = split(view.cy);
-    gl.uniform2f(L.u_centerX, cxd[0], cxd[1]);
-    gl.uniform2f(L.u_centerY, cyd[0], cyd[1]);
-    gl.uniform1f(L.u_span, view.span);
-    gl.uniform1i(L.u_maxIter, currentMaxIter());
-    gl.uniform1i(L.u_aa, mode === "still" ? QUALITY[state.quality].stillAA : 1);
-    gl.uniform1i(L.u_julia, state.julia ? 1 : 0);
-    const jx = split(state.juliaX), jy = split(state.juliaY);
-    gl.uniform2f(L.u_juliaX, jx[0], jx[1]);
-    gl.uniform2f(L.u_juliaY, jy[0], jy[1]);
+    if (L.u_span) gl.uniform1f(L.u_span, view.span);
     gl.uniform1f(L.u_colorDensity, state.density);
     gl.uniform1f(L.u_colorShift, state.colorShift);
     const pal = PALETTES[state.paletteIndex];
     gl.uniform3fv(L.u_stops, pal.flatStops);
     gl.uniform3f(L.u_interior, pal.interior[0], pal.interior[1], pal.interior[2]);
+  }
 
-    gl.bindBuffer(gl.ARRAY_BUFFER, quadBuf);
-    gl.enableVertexAttribArray(L.a_pos);
-    gl.vertexAttribPointer(L.a_pos, 2, gl.FLOAT, false, 0, 0);
+  function render() {
+    const aa = mode === "still" ? QUALITY[state.quality].stillAA : 1;
+    const maxIter = currentMaxIter();
+    const deep = view.span < DEEP_THRESHOLD;
+
+    if (deep && progPerturb && !state.julia) {
+      ensureReferenceOrbit(maxIter);
+      const L = progPerturb.loc;
+      gl.useProgram(progPerturb.program);
+      setShared(L);
+      const sp = split(view.span);
+      gl.uniform2f(L.u_spanHL, sp[0], sp[1]);
+      gl.uniform1i(L.u_maxIter, maxIter);
+      gl.uniform1i(L.u_aa, aa);
+      gl.uniform1i(L.u_refLength, refLengthVal);
+      gl.activeTexture(gl.TEXTURE0);
+      gl.bindTexture(gl.TEXTURE_2D, refTex);
+      gl.uniform1i(L.u_refTex, 0);
+      bindQuad(L);
+      gl.drawArrays(gl.TRIANGLES, 0, 6);
+      return;
+    }
+
+    const prog = (deep && progDeep) ? progDeep : progFast;
+    const L = prog.loc;
+    gl.useProgram(prog.program);
+    setShared(L);
+    const cxd = split(centerCx()), cyd = split(centerCy());
+    gl.uniform2f(L.u_centerX, cxd[0], cxd[1]);
+    gl.uniform2f(L.u_centerY, cyd[0], cyd[1]);
+    gl.uniform1i(L.u_maxIter, Math.min(maxIter, 2000));
+    gl.uniform1i(L.u_aa, aa);
+    gl.uniform1i(L.u_julia, state.julia ? 1 : 0);
+    const jx = split(state.juliaX), jy = split(state.juliaY);
+    gl.uniform2f(L.u_juliaX, jx[0], jx[1]);
+    gl.uniform2f(L.u_juliaY, jy[0], jy[1]);
+    bindQuad(L);
     gl.drawArrays(gl.TRIANGLES, 0, 6);
   }
 
@@ -298,7 +415,7 @@
   function setJulia(on) {
     if (on === state.julia) return;
     if (on) {
-      savedView = { cx: target.cx, cy: target.cy, span: target.span };
+      savedView = { x: view.x, y: view.y, span: target.span, P: P };
       state.julia = true;
       state.juliaLive = true;
       state.juliaX = state.juliaTX = -0.8;
@@ -307,8 +424,15 @@
     } else {
       state.julia = false;
       state.juliaLive = false;
-      const s = savedView || DEFAULT;
-      setView(s.cx, s.cy, s.span, true);
+      if (savedView) {
+        setPrecision(savedView.P);
+        view.x = target.x = savedView.x;
+        view.y = target.y = savedView.y;
+        view.span = target.span = savedView.span;
+        markInteract();
+      } else {
+        setView(DEFAULT.cx, DEFAULT.cy, DEFAULT.span, true);
+      }
     }
     updateUI();
     markInteract();
@@ -325,9 +449,20 @@
    * View control.                                                      *
    * ----------------------------------------------------------------- */
   function setView(cx, cy, span, snap) {
-    target.cx = cx; target.cy = cy; target.span = clamp(span, minSpan, MAX_SPAN);
-    if (snap) { view.cx = cx; view.cy = cy; view.span = target.span; }
+    target.span = clamp(span, currentMinSpan(), MAX_SPAN);
+    target.x = doubleToFixed(cx, P);
+    target.y = doubleToFixed(cy, P);
+    if (snap) { view.x = target.x; view.y = target.y; view.span = target.span; }
     markInteract();
+  }
+
+  // apply a zoom anchored at normalized cursor position (uv), to the target
+  function zoomAt(uv, factor) {
+    const newSpan = clamp(target.span * factor, currentMinSpan(), MAX_SPAN);
+    const k = newSpan / target.span;
+    target.x += doubleToFixed(uv.x * target.span * (1 - k), P);
+    target.y += doubleToFixed(uv.y * target.span * (1 - k), P);
+    target.span = newSpan;
   }
 
   function reset() {
@@ -367,8 +502,10 @@
     if (pointers.size === 1) {
       if (state.julia && state.juliaLive) { setJuliaFromScreen(e.clientX, e.clientY); return; }
       const wpp = view.span / rect.height;
-      view.cx -= dx * wpp; target.cx -= dx * wpp;
-      view.cy += dy * wpp; target.cy += dy * wpp;
+      const ddx = doubleToFixed(-dx * wpp, P);
+      const ddy = doubleToFixed(dy * wpp, P);
+      view.x += ddx; target.x += ddx;
+      view.y += ddy; target.y += ddy;
       markInteract();
     } else if (pointers.size === 2) {
       const pts = Array.from(pointers.values());
@@ -376,16 +513,11 @@
       const midX = (pts[0].x + pts[1].x) / 2 - rect.left;
       const midY = (pts[0].y + pts[1].y) / 2 - rect.top;
       if (pinchPrev && dist > 0) {
-        const w = screenToWorld(midX, midY, rect.width, rect.height, target);
-        const newSpan = clamp(target.span * (pinchPrev.dist / dist), minSpan, MAX_SPAN);
-        const k = newSpan / target.span;
-        target.cx = w.x - (w.x - target.cx) * k;
-        target.cy = w.y - (w.y - target.cy) * k;
-        target.span = newSpan;
+        zoomAt(uvAt(midX, midY, rect.width, rect.height), pinchPrev.dist / dist);
         const wpp = view.span / rect.height;
-        target.cx -= (midX - pinchPrev.midX) * wpp;
-        target.cy += (midY - pinchPrev.midY) * wpp;
-        view.cx = target.cx; view.cy = target.cy;
+        target.x += doubleToFixed(-(midX - pinchPrev.midX) * wpp, P);
+        target.y += doubleToFixed((midY - pinchPrev.midY) * wpp, P);
+        view.x = target.x; view.y = target.y;
         markInteract();
       }
       pinchPrev = { dist: dist, midX: midX, midY: midY };
@@ -408,16 +540,10 @@
     function (e) {
       e.preventDefault();
       const rect = canvas.getBoundingClientRect();
-      const w = screenToWorld(e.clientX - rect.left, e.clientY - rect.top, rect.width, rect.height, target);
       let dy = e.deltaY;
       if (e.deltaMode === 1) dy *= 16;       // lines -> approx px
       else if (e.deltaMode === 2) dy *= rect.height;
-      const factor = Math.exp(dy * 0.0016);
-      const newSpan = clamp(target.span * factor, minSpan, MAX_SPAN);
-      const k = newSpan / target.span;
-      target.cx = w.x - (w.x - target.cx) * k;
-      target.cy = w.y - (w.y - target.cy) * k;
-      target.span = newSpan;
+      zoomAt(uvAt(e.clientX - rect.left, e.clientY - rect.top, rect.width, rect.height), Math.exp(dy * 0.0016));
       markInteract();
     },
     { passive: false }
@@ -426,12 +552,7 @@
   canvas.addEventListener("dblclick", function (e) {
     if (state.julia && state.juliaLive) return;
     const rect = canvas.getBoundingClientRect();
-    const w = screenToWorld(e.clientX - rect.left, e.clientY - rect.top, rect.width, rect.height, target);
-    const newSpan = clamp(target.span * 0.4, minSpan, MAX_SPAN);
-    const k = newSpan / target.span;
-    target.cx = w.x - (w.x - target.cx) * k;
-    target.cy = w.y - (w.y - target.cy) * k;
-    target.span = newSpan;
+    zoomAt(uvAt(e.clientX - rect.left, e.clientY - rect.top, rect.width, rect.height), 0.4);
     markInteract();
   });
 
@@ -558,6 +679,12 @@
     return (v >= 0 ? " " : "") + v.toFixed(decimals);
   }
 
+  function fmtCoordHP(fixedVal, mag) {
+    const decimals = clamp(Math.round(Math.log10(Math.max(1, mag))) + 3, 4, 28);
+    const s = fixedToDecimalString(fixedVal, P, decimals);
+    return s[0] === "-" ? s : " " + s;
+  }
+
   let lastReadout = 0;
   let frameCount = 0;
   let fpsLast = performance.now();
@@ -571,10 +698,10 @@
       els.rCoord.textContent =
         "c " + fmtCoord(state.juliaX, 1000).trim() + " , " + fmtCoord(state.juliaY, 1000).trim();
     } else {
-      els.rCoord.textContent = fmtCoord(view.cx, mag) + " , " + fmtCoord(view.cy, mag);
+      els.rCoord.textContent = fmtCoordHP(view.x, mag) + " , " + fmtCoordHP(view.y, mag);
     }
     els.rZoom.textContent = fmtMag(mag);
-    els.rIter.textContent = currentMaxIter() + (progDeep && view.span < DEEP_THRESHOLD ? " · hd" : "");
+    els.rIter.textContent = currentMaxIter() + (view.span < DEEP_THRESHOLD ? " · hd" : "");
     els.rFps.textContent = fps + " fps";
   }
 
@@ -582,6 +709,7 @@
    * Main loop.                                                         *
    * ----------------------------------------------------------------- */
   function frame(now) {
+    adaptPrecision();
     const animating = stepEasing();
 
     let juliaMoving = false;

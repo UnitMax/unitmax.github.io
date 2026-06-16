@@ -6,16 +6,16 @@ const games = [
     artHue: 196,
   },
   {
+    title: "Infinite Mandelbrot Set",
+    genre: "Infinite-Zoom GPU Visualizer",
+    url: "./games/mandelbrot/",
+    artHue: 236,
+  },
+  {
     title: "Coming Soon",
     genre: "t.b.d.",
     url: "#",
     artHue: 288,
-  },
-  {
-    title: "Mandelbrot Set",
-    genre: "GPU Visualizer",
-    url: "./games/mandelbrot/",
-    artHue: 236,
   },
 ];
 
